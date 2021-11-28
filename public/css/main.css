@@ -19,8 +19,14 @@ form {
   display: inline;
 }
 
-.centered {
+.centered__page {
   text-align: center;
+  margin-top: 8rem;
+}
+
+.centered__product {
+  text-align: center;
+  margin-top: 7rem;
 }
 
 .image {

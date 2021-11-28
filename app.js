@@ -32,22 +32,26 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoose.connect(
-  "mongodb+srv://anantduhan:Sapna0911@realkart.ciloc.mongodb.net/shop?retryWrites=true"
-)
-.then(result => {
-  User.findOne().then(user => {
-    if(!user) {
-      const user = new User({
-        name: "Anant Duhan",
-        email: "duhananant@gmail.com",
-        cart: {
-          items: [],
-        },
-      });
-    }
+mongoose
+  .connect(
+    "mongodb+srv://anantduhan:Sapna0911@realkart.ciloc.mongodb.net/shop?retryWrites=true"
+  )
+  .then((result) => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: "Anant Duhan",
+          email: "duhananant@gmail.com",
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
+    app.listen(3000);
+  })
+  .catch((err) => {
+    console.log(err);
   });
-  user.save();
-  app.listen(3000);
-})
-.catch((err) => console.log(err));
+
