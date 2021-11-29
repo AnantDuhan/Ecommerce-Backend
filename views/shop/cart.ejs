@@ -9,10 +9,10 @@
                 <ul class="cart__item-list">
                     <% products.forEach(p => { %>
                         <li class="cart__item">
-                            <h1><%= p.title %></h1>
+                            <h1><%= p.productId.title %></h1>
                             <h2>Quantity: <%= p.quantity %></h2>
                             <form action="/cart-delete-item" method="POST">
-                                <input type="hidden" value="<%= p._id %>" name="productId">
+                                <input type="hidden" value="<%= p.productId._id %>" name="productId">
                                 <button class="btn danger" type="submit">Delete</button>
                             </form>
                         </li>
@@ -27,7 +27,7 @@
                 
             <% } else { %>
                 <div class="centered__product">
-                    <img src="/images/ProductNotFound.jpg" alt="" >
+                    <img src="/images/EmptyCart.png" alt="" >
                 </div>
             <% } %>
         </main>
