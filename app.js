@@ -4,11 +4,19 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const mongoDBStore = require("connect-mongodb-session")(session);
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
 
+const MONGODB_URI =
+  "mongodb+srv://anantduhan:Sapna0911@realkart.ciloc.mongodb.net/shop";
+
 const app = express();
+const store = new mongoDBStore({
+  uri: MONGODB_URI,
+  collection: 'sessions',
+});
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -23,18 +31,10 @@ app.use(session
   ({ 
     secret: "my secret session", 
     resave: false, 
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: store
   })
 );
-
-app.use((req, res, next) => {
-  User.findById("619f62a70e14d11c71fce43a")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -44,7 +44,7 @@ app.use(errorController.get404);
 
 mongoose
   .connect(
-    "mongodb+srv://anantduhan:Sapna0911@realkart.ciloc.mongodb.net/shop?retryWrites=true"
+    MONGODB_URI
   )
   .then((result) => {
     User.findOne().then((user) => {
