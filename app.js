@@ -15,7 +15,7 @@ const MONGODB_URI =
 const app = express();
 const store = new mongoDBStore({
   uri: MONGODB_URI,
-  collection: 'sessions',
+  collection: 'sessions'
 });
 
 app.set("view engine", "ejs");
@@ -55,22 +55,8 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect(
-    MONGODB_URI
-  )
+  .connect(MONGODB_URI)
   .then((result) => {
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: "Anant Duhan",
-          email: "duhananant@gmail.com",
-          cart: {
-            items: [],
-          },
-        });
-        user.save();
-      }
-    });
     app.listen(3000);
   })
   .catch((err) => {
