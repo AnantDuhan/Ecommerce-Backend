@@ -30,6 +30,7 @@
                                     <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
                                     <form action="/admin/delete-product" method="POST">
                                         <input type="hidden" value="<%= product._id %>" name="productId">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <button class="btn" type="submit">Delete</button>
                                     </form>
 
@@ -38,7 +39,9 @@
                             <% } %>
                     </div>
                     <% } else { %>
-                        <h1>No Products Found!</h1>
+                        <div class="centered__product">
+                            <img src="images/ProductNotFound.jpg" alt="">
+                        </div>
                         <% } %>
             </main>
             <%- include('../includes/end.ejs') %>
