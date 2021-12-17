@@ -73,4 +73,3 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-//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
