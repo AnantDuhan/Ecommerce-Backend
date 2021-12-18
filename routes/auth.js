@@ -10,7 +10,17 @@ router.get("/login", authController.getLogin);
 
 router.get("/signup", authController.getSignup);
 
-router.post("/login", authController.postLogin);
+router.post(
+  "/login",
+  [body("email")
+    .isEmail()
+    .withMessage("Please Enter a valid Email."),
+  body('password', 'Incorrect Password')
+    .isStrongPassword()
+
+],
+  authController.postLogin
+);
 
 router.post(
   "/signup",
