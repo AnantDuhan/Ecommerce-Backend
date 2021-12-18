@@ -14,9 +14,11 @@ router.post(
   "/login",
   [body("email")
     .isEmail()
-    .withMessage("Please Enter a valid Email."),
+    .withMessage("Please Enter a valid Email.")
+    .normalizeEmail(),
   body('password', 'Incorrect Password')
     .isStrongPassword()
+    .trim()
 
 ],
   authController.postLogin
@@ -41,14 +43,16 @@ router.post(
             );
           }
         });
-      }),
-    body('password').isStrongPassword(),
+      })
+      .normalizeEmail(),
+    body('password').isStrongPassword().trim(),
     body('confirmPassword').custom((value, { req }) => {
       if(value !== req.body.password) {
         throw new Error("Passwords must match!")
       }
       return true;
     })
+    .trim()
   ],
   authController.postSignup
 );
