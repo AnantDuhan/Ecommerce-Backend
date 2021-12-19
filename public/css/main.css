@@ -33,6 +33,22 @@ form {
   margin-top: 7rem;
 }
 
+.p__500 {
+  text-align: center;
+  margin-top: 10rem;
+}
+
+.p__500 h1 {
+  color: #05a69e;
+  font-weight: bold;
+  font-size: 100px;
+  margin-bottom: -30px;
+}
+
+.p__500 h2 {
+  color: #00695c;
+}
+
 .image {
   height: 20rem;
 }
