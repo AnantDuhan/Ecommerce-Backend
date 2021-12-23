@@ -103,10 +103,11 @@ app.use(errorController.get404);
 app.use((error, req, res, next) => {
   // res.render("/500");
   res.status(500).render("500", {
-    pageTitle: "Error",
+    pageTitle: "Error!",
     path: "/500",
     isAuthenticated: req.session.isLoggedIn,
   });
+  console.log(error);
 });
 
 mongoose
