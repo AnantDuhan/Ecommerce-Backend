@@ -1,6 +1,8 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 
+const Post = require("../models/post");
+
 exports.getPosts = (req, res, next) => {
     res.status(200).json({ 
         posts: [{
@@ -19,26 +21,32 @@ exports.getPosts = (req, res, next) => {
 exports.createPost = (req, res, next) => {
     const errors = validationResult(req, res);
     if(!errors.isEmpty()) {
-        return res
-            .status(422)
-            .json({
-                message: 'Vaidation failed, entered data is incorrect', 
-                errors: errors.array()
-            })
+        const error = new Error("Vaidation failed, entered data is incorrect.");
+        error.statusCode = 422;
+        throw error;
     }
     
-    // Create post in db
     const title = req.body.title;
     const content = req.body.content;
-    res.status(201).json({ 
-        message: 'Post created successfully!', 
-        post: { _id: uuidv4(), 
-            title: title, 
-            content: content,
-            creator: {
-                name: 'Anant Duhan',
-            },
-            createdAt: new Date()
+    const post = new Post({
+        title: title, 
+        content: content,
+        imageUrl: 'images/Book.jpg',
+        creator: {
+            name: 'Anant Duhan',
         }
+    });
+    post.save()
+    .then((result) => {
+        res.status(201).json({
+          message: "Post created successfully!",
+          post: result,
+        });
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            error.statusCode = 500;
+        }
+        next(err);
     });
 };
