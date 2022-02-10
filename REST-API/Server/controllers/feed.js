@@ -1,44 +1,171 @@
+const fs  = require('fs');
+const path = require("path");
+
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 
+const Post = require("../models/post");
+
 exports.getPosts = (req, res, next) => {
-    res.status(200).json({ 
-        posts: [{
-            _id: '1',
-            title: 'First Post', 
-            content: 'This is the first post!',
-            imageUrl: 'images/Book.jpg',
-            creator: {
-                name: 'Anant Duhan',
-            },
-            createdAt: new Date()
-        }] 
-    });
+    const currPage = req.query.page || 1;
+    const perPage = 2;
+    let totalItems;
+    Post.find()
+      .countDocuments()
+      .then((count) => {
+        totalItems = count;
+        return Post.find()
+            .skip((currPage - 1) * perPage)
+            .limit(perPage);
+      })
+      .then((posts) => {
+        res.status(200).json({
+          message: "Fetched posts successfully.",
+          posts: posts,
+          totalItems: totalItems
+        });
+      })
+      .catch((err) => {
+        if (!err.statusCode) {
+          error.statusCode = 500;
+        }
+        next(err);
+      });
 };
 
 exports.createPost = (req, res, next) => {
     const errors = validationResult(req, res);
     if(!errors.isEmpty()) {
-        return res
-            .status(422)
-            .json({
-                message: 'Vaidation failed, entered data is incorrect', 
-                errors: errors.array()
-            })
+        const error = new Error("Vaidation failed, entered data is incorrect.");
+        error.statusCode = 422;
+        throw error;
     }
     
-    // Create post in db
+    if(!req.file) {
+        const error = new Error("No image provided");
+        error.statusCode = 422;
+        throw error;
+    }
+
+    const imageUrl = req.file.path.replace("\\", "/");
     const title = req.body.title;
     const content = req.body.content;
-    res.status(201).json({ 
-        message: 'Post created successfully!', 
-        post: { _id: uuidv4(), 
-            title: title, 
-            content: content,
-            creator: {
-                name: 'Anant Duhan',
-            },
-            createdAt: new Date()
+    const post = new Post({
+        title: title, 
+        content: content,
+        imageUrl: imageUrl,
+        creator: {
+            name: 'Anant Duhan',
         }
     });
+    post.save()
+    .then((result) => {
+        res.status(201).json({
+          message: "Post created successfully!",
+          post: result,
+        });
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            error.statusCode = 500;
+        }
+        next(err);
+    });
+};
+
+exports.getPost = (req, res, next) => {
+    const postId = req.params.postId;
+    Post.findById(postId)
+    .then((post) => {
+        if(!post) {
+            const error = new Error('Could not find post.');
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({
+            message: 'Post fetched',
+            post: post
+        });
+    })
+    .catch (err => {
+        if (!err.statusCode) {
+          error.statusCode = 500;
+        }
+        next(err);
+    })
+};
+
+exports.updatePost = (req, res, next) => {
+    const postId = req.params.postId;
+    const errors = validationResult(req, res);
+    if (!errors.isEmpty()) {
+      const error = new Error("Vaidation failed, entered data is incorrect.");
+      error.statusCode = 422;
+      throw error;
+    }
+    const title = req.body.title;
+    const content = req.body.content;
+    let imageUrl = req.body.imageUrl;
+    if(req.file) {
+        imageUrl = req.file.path;
+    }
+    if(!imageUrl) {
+        const error = new Error('No file picked');
+        error.statusCode = 422;
+        throw error;
+    }
+    Post.findById(postId)
+      .then(post => {
+          if (!post) {
+            const error = new Error("Could not find post.");
+            error.statusCode = 404;
+            throw error;
+          }
+          if(imageUrl !== post.imageUrl) {
+              clearImage(post.imageUrl);
+          }
+          post.title = title;
+          post.imageUrl = imageUrl;
+          post.content = content;
+          return post.save();
+      })
+      .then(result => {
+          res.status(200).json({ message: 'Post Updated', post: result });
+      })
+      .catch((err) => {
+        if (!err.statusCode) {
+          error.statusCode = 500;
+        }
+        next(err);
+      });
+};
+
+exports.deletePost = (req, res, next) => {
+    const postId = req.params.postId;
+    Post.findById(postId)
+        .then(post => {
+            if (!post) {
+              const error = new Error("Could not find post.");
+              error.statusCode = 404;
+              throw error;
+            }
+            // check loggedIn User
+            clearImage(post.imageUrl);
+            return Post.findByIdAndRemove(postId);
+        })
+        .then(result => {
+            console.log(result);
+            res.status(200).json({ message: 'Deleted Post' });
+        })
+        .catch((err) => {
+            if (!err.statusCode) {
+            error.statusCode = 500;
+            }
+            next(err);
+        });
+}
+
+const clearImage = filePath => {
+    filePath = path.join(__dirname, '..', filePath);
+    fs.unlink(filePath, err => console.log(err));
 };
