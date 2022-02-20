@@ -9,6 +9,7 @@ const { v4: uuidv4 } = require("uuid");
 const feedRoutes = require('./routes/feed');
 const authRoutes = require("./routes/auth");
 
+
 const app = express();
 
 const storage = multer.diskStorage({
@@ -66,7 +67,11 @@ mongoose
     'mongodb+srv://anantduhan:Sapna0911@realkart.ciloc.mongodb.net/messages'
   )
   .then((result) => {
-    app.listen(8080);
+    const server = app.listen(8080);
+    const io = require('socket.io')(server);
+    io.on('connection', socket => {
+      console.log('Client connected');
+    });
   })
   .catch((err) => {
     console.log(err);

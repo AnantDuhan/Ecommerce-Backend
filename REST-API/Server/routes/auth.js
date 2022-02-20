@@ -17,15 +17,15 @@ router.put('/signup', [
                     if(userDoc) {
                         return Promise.reject('E-mail address already exists!');
                     }
-                })
+                });
         })
         .normalizeEmail(),
         body('password')
             .trim()
-            .isLength({ min: 8 }),
+            .isLength({ min: 5 }),
         body('name').trim().not().isEmpty()
-    ]
-    , authController.signup
+    ],
+     authController.signup
 );
 
 router.post('/login', authController.login);
